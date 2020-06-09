@@ -14,19 +14,43 @@ public class SortTool {
     private ArrayList<String> strings;
     private HashMap<String, Integer> counter;
 
+    public Mode getFlag() {
+        return this.flag;
+    }
     public void setFlag(Mode flag) {
         this.flag = flag;
+    }
+    public int getNumber(){
+        return iNumber;
     }
     public void setNumber(int iNumber) {
         this.iNumber = iNumber;
     }
-    SortTool(String input, String output){
+
+    public String getInputFile() {
+        return inputFile;
+    }
+
+    public void setInputFile(String inputFile) {
+        this.inputFile = inputFile;
+    }
+
+    public String getOutputFile() {
+        return outputFile;
+    }
+
+    public void setOutputFile(String outputFile) {
+        this.outputFile = outputFile;
+    }
+    
+    SortTool(String input, String output) {
         this.inputFile = input;
         this.outputFile = output;
         strings = new ArrayList<>();
         counter = new HashMap<>();
     }
-    SortTool(String[] args) {
+    SortTool(String[] args) throws IllegalArgumentException{
+        this.validateArgs(args);
         this.inputFile = args[0];
         this.outputFile = args[1];
         strings = new ArrayList<>();
@@ -44,17 +68,40 @@ public class SortTool {
                 break;
         }
     }
-    public void createStreams() throws Exception {
+    public void validateArgs(String[] args) throws IllegalArgumentException{
+        if (args.length != 3 && args.length != 4)
+            throw new IllegalArgumentException("Wrong number of command arguments");
+        File input = new File(args[0]);
+        if (!input.exists()) {
+            throw new IllegalArgumentException("Wrong input file path");
+        }
+        int mode = Integer.parseInt(args[2]);
+        if (mode == 0 || mode == 1) {
+            if(args.length != 3)
+                throw new IllegalArgumentException("Wrong number of command arguments");
+        } else if (mode == 2) {
+            if (args.length != 4)
+                throw new IllegalArgumentException("Wrong number of command arguments");
+            int iNumber = Integer.parseInt(args[3]);
+            if (iNumber <= 0)
+                throw new IllegalArgumentException("Fourth argument must be positive");
+        } else {
+            throw new IllegalArgumentException("Third argument must be in {0, 1, 2}");
+        }
+    }
+    public void createStreams() throws IOException {
         fileReader = new BufferedReader(new FileReader(inputFile));
         fileWriter = new BufferedWriter(new FileWriter(outputFile));
     }
-    public void closeStreams()throws Exception {
+    public void closeStreams() throws IOException {
         fileReader.close();
         fileWriter.close();
     }
-    public void readFile() throws Exception {
+    public void readFile() throws IOException, IllegalArgumentException {
         String newLine;
         while((newLine = fileReader.readLine()) != null) {
+            if(newLine.split(" ").length < iNumber)
+                throw new IllegalArgumentException("Fourth argument too big");
             if (counter.containsKey(newLine)) {
                 Integer tmp = counter.get(newLine) + 1;
                 counter.put(newLine, tmp);
@@ -64,7 +111,7 @@ public class SortTool {
             strings.add(newLine);
         }
     }
-    public void writeFile() throws Exception {
+    public void writeFile() throws IOException {
         for (String s : strings) {
             fileWriter.write(s + " " + counter.get(s) + "\n");
         }
@@ -92,22 +139,13 @@ public class SortTool {
                     public int compare(String o1, String o2) {
                         String[] arr1 = o1.split(" ");
                         String[] arr2 = o2.split(" ");
-                        String s1 = "";
-                        String s2 = "";
-                        if(arr1.length >= iNumber) {
-                            s1 = arr1[iNumber - 1];
-                        }
-                        if(arr2.length >= iNumber) {
-                            s2 = arr2[iNumber - 1];
-                        }
-                        return s1.compareTo(s2);
+                        return arr1[iNumber - 1].compareTo(arr2[iNumber - 1]);
                     }
                 };
                 strings.sort(comparatorWord);
-                break;
         }
     }
-    public void execute() throws Exception{
+    public void execute() throws IOException, IllegalArgumentException {
         this.createStreams();
         this.readFile();
         this.sort();
