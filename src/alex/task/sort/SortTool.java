@@ -49,7 +49,7 @@ public class SortTool {
         strings = new ArrayList<>();
         counter = new HashMap<>();
     }
-    SortTool(String[] args) throws IllegalArgumentException{
+    SortTool(String[] args) throws IllegalArgumentException {
         this.validateArgs(args);
         this.inputFile = args[0];
         this.outputFile = args[1];
@@ -68,7 +68,7 @@ public class SortTool {
                 break;
         }
     }
-    public void validateArgs(String[] args) throws IllegalArgumentException{
+    public void validateArgs(String[] args) throws IllegalArgumentException {
         if (args.length != 3 && args.length != 4)
             throw new IllegalArgumentException("Wrong number of command arguments");
         File input = new File(args[0]);
@@ -163,8 +163,14 @@ public class SortTool {
      *            Example:
      *                  SortTool C:\input.txt C:\output.txt 2 1
      */
-    public static void main(String[] args) throws Exception {
-        SortTool tool = new SortTool(args);
-        tool.execute();
+    public static void main(String[] args) {
+        SortTool tool;
+        try {
+             tool = new SortTool(args);
+             tool.execute();
+        } catch (IllegalArgumentException | IOException e) {
+            System.out.println(e.getClass().getSimpleName() + " " + e.getMessage());
+        }
+
     }
 }
